@@ -1,7 +1,7 @@
 schema_version: parallax-signature-pack/v1
 id: parallax.content-surfaces
 name: Content and extracted-string surfaces
-version: 0.4.0
+version: 0.5.0
 status: draft
 signatures:
 - id: sig.content.ftp-url
@@ -957,6 +957,7 @@ signatures:
   summary: embedded URL literal
   notes: Extracted from rules.py scan_strings (_URL_RE).
   cap_per_file: 10
+  mechanic: true
 - id: sig.content.artf.ip
   atom: ARTF.IP
   surface: content
@@ -968,6 +969,7 @@ signatures:
   summary: hardcoded IP address
   notes: Extracted from rules.py scan_strings (_IP_RE).
   cap_per_file: 8
+  mechanic: true
 - id: sig.content.artf.email
   atom: ARTF.EMAIL
   surface: content
@@ -979,6 +981,7 @@ signatures:
   summary: hardcoded email address
   notes: Extracted from rules.py scan_strings (_EMAIL_RE).
   cap_per_file: 8
+  mechanic: true
 - id: sig.content.artf.crypto-addr
   atom: ARTF.CRYPTO_ADDR
   surface: content
@@ -990,6 +993,7 @@ signatures:
   summary: cryptocurrency address literal
   notes: Extracted from rules.py scan_strings (_CRYPTO_ADDR_RE).
   cap_per_file: 4
+  mechanic: true
 - id: sig.content.artf.domain
   atom: ARTF.DOMAIN
   surface: content
@@ -1009,6 +1013,7 @@ signatures:
     on_missing: drop
     regex_flags:
     - ignore_case
+  mechanic: true
 - id: sig.content.artf.hash
   atom: ARTF.HASH
   surface: content
@@ -1020,6 +1025,7 @@ signatures:
   summary: hash / digest literal
   notes: Extracted from rules.py scan_strings (_HASH_RE).
   cap_per_file: 6
+  mechanic: true
 - id: sig.content.artf.timestamp-iso
   atom: ARTF.TIMESTAMP
   surface: content
@@ -1037,6 +1043,7 @@ signatures:
     on_missing: drop
     regex_flags:
     - ignore_case
+  mechanic: true
 - id: sig.content.artf.timestamp-epoch
   atom: ARTF.TIMESTAMP
   surface: content
@@ -1054,3 +1061,54 @@ signatures:
     on_missing: drop
     regex_flags:
     - ignore_case
+  mechanic: true
+- id: sig.content.load.memchain
+  atom: LOAD.MEMCHAIN
+  surface: content
+  method: static-source
+  languages:
+  - '*'
+  regex: (?:(?:eval|exec)\s*\([^;\n]{0,160}(?:Buffer\.from|atob|base64\.(?:b64decode|decodebytes)|marshal\.loads|zlib\.decompress|gzip\.decompress)|new\s+Function\s*\([^;\n]{0,120}(?:Buffer\.from|atob)|vm\.(?:runInThisContext|runInNewContext|compileFunction)\s*\(|(?:\[System\.Reflection\.Assembly\]|Reflection\.Assembly|Assembly)\s*(?:\.|::)\s*Load\s*\(\s*(?:\[Convert\]::FromBase64String|Convert\.FromBase64String|File\.ReadAllBytes)|defineClass\s*\([^;\n]{0,180}(?:byte\[\]|\bbytes\b|,\s*0\s*,)|\bmemfd_create\b[\s\S]{0,500}\bfexecve\b|\bfexecve\s*\()
+  confidence: 0.6
+  summary: in-memory / reflective load chain
+  mechanic: true
+  notes: Extracted from rules.py scan_strings (_LOAD_MEMCHAIN_RE); engine applies bespoke summary/caps.
+  regex_flags:
+  - ignore_case
+  cap_per_file: 4
+- id: sig.content.xfrm.strcon
+  atom: XFRM.STRCON
+  surface: content
+  method: static-source
+  languages:
+  - '*'
+  regex: String\.fromCharCode\(|(?:\\x[0-9a-fA-F]{2}){4,}|(?:chr\(\d+\)\s*\+\s*){3,}
+  confidence: 0.5
+  summary: obfuscated string construction
+  mechanic: true
+  notes: Extracted from rules.py scan_strings (_XFRM_STRCON_RE); engine applies bespoke summary/caps.
+- id: sig.content.xfrm.ctrlflow
+  atom: XFRM.CTRLFLOW
+  surface: content
+  method: static-source
+  languages:
+  - '*'
+  regex: (?:while\s*\(\s*(?:true|1|!!\[\])\s*\)|for\s*\(\s*;\s*;\s*\))[\s\S]{0,2000}switch\s*\([^)\n]{1,120}\)[\s\S]{0,2000}\b(?:continue|case\s+['\"]?\d+['\"]?)\b|['\"](?:\d+\|){3,}\d+['\"]\s*\.split\(\s*['\"]\|['\"]\s*\)[\s\S]{0,1500}switch\s*\(|\b(?:controlFlowFlattening|control_flow_flattening|opaquePredicate|opaque_predicate)\b
+  confidence: 0.5
+  summary: control-flow flattening / opaque-predicate marker
+  mechanic: true
+  notes: Extracted from rules.py scan_strings (_XFRM_CTRLFLOW_RE); engine applies bespoke summary/caps.
+  regex_flags:
+  - ignore_case
+  cap_per_file: 3
+- id: sig.content.xfrm.rename
+  atom: XFRM.RENAME
+  surface: content
+  method: static-source
+  languages:
+  - '*'
+  regex: \b_0x[0-9a-fA-F]{4,}\b
+  confidence: 0.45
+  summary: multiple hex-style renamed identifiers
+  mechanic: true
+  notes: Extracted from rules.py scan_strings (_XFRM_RENAME_IDENT_RE); engine applies bespoke summary/caps.

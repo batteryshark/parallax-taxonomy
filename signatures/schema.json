@@ -163,6 +163,10 @@
           "type": "integer",
           "minimum": 1
         },
+        "mechanic": {
+          "type": "boolean",
+          "description": "The engine applies bespoke mechanics (caps, dedup, context, custom summary/aggregation) for this content signature; it is not run by the generic content driver."
+        },
         "notes": {
           "type": "string"
         },
