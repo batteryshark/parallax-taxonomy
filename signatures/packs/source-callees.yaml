@@ -2143,6 +2143,24 @@ signatures:
   summary: process execution (ProcessBuilder)
   priority: 100
   notes: Extracted from _LANG_RULES.kotlin.
+- id: sig.load.eval.python.dynamic-exec
+  atom: LOAD.EVAL
+  surface: callee
+  method: static-source
+  languages:
+  - python
+  match:
+    mode: exact
+    values:
+    - exec
+    - compile
+  confidence: 0.6
+  summary: dynamic code execution (exec/compile)
+  priority: 100
+  notes: Python's builtin exec()/compile() execute or generate code (LOAD.EVAL),
+    not posix process replacement; higher priority than the universal EXEC.PROC
+    createprocess sig so python `exec` classifies correctly. Exact match (not base)
+    avoids re.compile / str.exec false positives.
 - id: sig.exec.proc.python.subprocess
   atom: EXEC.PROC
   surface: callee
