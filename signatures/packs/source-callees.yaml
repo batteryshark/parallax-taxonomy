@@ -270,7 +270,7 @@ signatures:
     languages: ["applescript", "batch", "c", "cpp", "csharp", "dockerfile", "elixir", "go", "groovy", "haskell", "hcl", "html", "java", "kotlin", "lua", "make", "objc", "perl", "php", "powershell", "r", "ruby", "rust", "scala", "shell", "sql", "swift", "vb"]
     match:
       mode: substring
-      values: ["fs::write", "ioutil.writefile", "os.create", "os.writefile", "std::fs::write"]
+      values: ["fs.write", "ioutil.writefile", "os.create", "os.writefile", "std.fs.write"]
       normalize: ["lowercase", "member_separators"]
     confidence: 0.72
     summary: "filesystem write"
@@ -296,7 +296,7 @@ signatures:
     languages: ["applescript", "batch", "c", "cpp", "csharp", "dockerfile", "elixir", "go", "groovy", "haskell", "hcl", "html", "java", "kotlin", "lua", "make", "objc", "perl", "php", "powershell", "r", "ruby", "rust", "scala", "shell", "sql", "swift", "vb"]
     match:
       mode: substring
-      values: ["fs::read", "ioutil.readfile", "os.readfile", "std::fs::read"]
+      values: ["fs.read", "ioutil.readfile", "os.readfile", "std.fs.read"]
       normalize: ["lowercase", "member_separators"]
     confidence: 0.66
     summary: "filesystem read"
@@ -1017,19 +1017,32 @@ signatures:
     summary: "process execution"
     priority: 100
     notes: "Extracted from _LANG_RULES.r."
-  - id: sig.netw.http.r.base.download-file
+  - id: sig.netw.http.r.exact.download-file
+    atom: NETW.HTTP
+    surface: callee
+    method: static-source
+    languages: ["r"]
+    match:
+      mode: exact
+      values: ["download.file"]
+      normalize: ["lowercase", "member_separators"]
+    confidence: 0.65
+    summary: "outbound network fetch"
+    priority: 100
+    notes: "Extracted from _LANG_RULES.r. Split from the base-mode rule: base compares only the last '.'-segment, so R's dotted 'download.file' reduced to 'file' and never matched. Exact mode matches the full normalized callee."
+  - id: sig.netw.http.r.base.url
     atom: NETW.HTTP
     surface: callee
     method: static-source
     languages: ["r"]
     match:
       mode: base
-      values: ["download.file", "url"]
+      values: ["url"]
       normalize: ["lowercase", "member_separators"]
     confidence: 0.65
     summary: "outbound network fetch"
     priority: 100
-    notes: "Extracted from _LANG_RULES.r."
+    notes: "Extracted from _LANG_RULES.r. 'url' stays base to match R's url() connection opener (incl. namespaced calls)."
   - id: sig.exec.proc.swift.base.process
     atom: EXEC.PROC
     surface: callee

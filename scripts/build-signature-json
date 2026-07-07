@@ -22,6 +22,45 @@ inputs.each do |input|
     exit 1
   end
 
+  # base mode compares only the last "."-segment of a normalized callee, and
+  # normalization folds "::"/"->" to ".". A base value containing any member
+  # separator therefore loses its leading segments and can never match — a dead
+  # rule. Reject them at build time (e.g. R "download.file" -> segment "file").
+  dead_base = []
+  Array(data["signatures"]).each do |sig|
+    match = sig["match"]
+    next unless match.is_a?(Hash) && match["mode"] == "base"
+    Array(match["values"]).each do |value|
+      dead_base << [sig["id"], value] if value.is_a?(String) && value.match?(/[.:>]/)
+    end
+  end
+  unless dead_base.empty?
+    warn "base-mode values must not contain a member separator (. :: ->) in #{yaml_path}:"
+    dead_base.each { |id, value| warn "  #{id}: #{value.inspect} (base compares only the last '.'-segment)" }
+    exit 1
+  end
+
+  # substring/suffix/exact* modes keep interior "."s (e.g. "net.http" is fine),
+  # but a value carrying "::" or "->" still can never match: normalization folds
+  # those to "." on the callee before comparison, so the raw separator is absent
+  # from every candidate. This is the class of bug that silenced Rust
+  # std::fs::write / std::fs::read detection (values should read std.fs.write).
+  dead_sep = []
+  Array(data["signatures"]).each do |sig|
+    match = sig["match"]
+    next unless match.is_a?(Hash)
+    next unless %w[substring suffix exact exact_or_suffix].include?(match["mode"])
+    Array(match["values"]).each do |value|
+      next unless value.is_a?(String) && (value.include?("::") || value.include?("->"))
+      dead_sep << [sig["id"], value, value.gsub("::", ".").gsub("->", ".")]
+    end
+  end
+  unless dead_sep.empty?
+    warn "match values must not contain a folded separator (:: or ->) in #{yaml_path}:"
+    dead_sep.each { |id, value, fixed| warn "  #{id}: #{value.inspect} -> use #{fixed.inspect}" }
+    exit 1
+  end
+
   json_path = yaml_path.sub_ext(".json")
   json_path.write(JSON.pretty_generate(data) + "\n")
   puts "wrote #{json_path.relative_path_from(root)}"
