@@ -2161,6 +2161,37 @@ signatures:
     not posix process replacement; higher priority than the universal EXEC.PROC
     createprocess sig so python `exec` classifies correctly. Exact match (not base)
     avoids re.compile / str.exec false positives.
+- id: sig.xfrm.encode.base64
+  atom: XFRM.ENCODE
+  surface: callee
+  method: static-source
+  languages:
+  - javascript
+  - typescript
+  - tsx
+  - python
+  - csharp
+  - php
+  - ruby
+  - go
+  match:
+    mode: exact_or_suffix
+    values:
+    - atob
+    - btoa
+    - buffer.from
+    - base64_decode
+    - base64_encode
+    - b64decode
+    - b64encode
+    - frombase64string
+  confidence: 0.6
+  summary: base64 encode/decode
+  priority: 60
+  notes: base64/buffer transform primitives -> XFRM.ENCODE, migrating the engine's
+    AST/legacy XFRM.ENCODE detection into pack data. A supporting obfuscation signal
+    (buffer.from is intentionally broad, matching the reference engines); it only
+    escalates a disposition when composed with LOAD.EVAL etc. (BP-OBFEXEC).
 - id: sig.exec.proc.python.subprocess
   atom: EXEC.PROC
   surface: callee
