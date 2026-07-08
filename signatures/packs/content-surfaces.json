@@ -1443,6 +1443,22 @@
       "summary": "multiple hex-style renamed identifiers",
       "mechanic": true,
       "notes": "Extracted from rules.py scan_strings (_XFRM_RENAME_IDENT_RE); engine applies bespoke summary/caps."
+    },
+    {
+      "id": "sig.content.remote-download-cmd",
+      "atom": "NETW.HTTP",
+      "surface": "content",
+      "method": "static-source",
+      "languages": [
+        "*"
+      ],
+      "regex": "\\b(?:curl|wget)\\s+[-\\w$'\\\"/.]|\\b(?:Invoke-WebRequest|iwr)\\b|\\bNet\\.WebClient\\b|\\b(?:DownloadString|DownloadFile|DownloadData)\\b|\\bcertutil\\b[^\\n]{0,120}-urlcache|\\bbitsadmin\\b[^\\n]{0,120}/transfer",
+      "confidence": 0.6,
+      "summary": "remote-download command (curl/wget/iwr/WebClient): {match_strip}",
+      "notes": "curl/wget/Invoke-WebRequest/WebClient/certutil/bitsadmin download command in string content. Supplies the NETW half of a download-and-execute (dropper) when a shell/eval sink is also present (e.g. os.system('curl URL | sh')); the bare-command shell-callee path already emits NETW.HTTP for the same tools.",
+      "regex_flags": [
+        "ignore_case"
+      ]
     }
   ]
 }
