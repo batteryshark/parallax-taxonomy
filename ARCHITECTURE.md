@@ -322,7 +322,7 @@ Response is the only layer that is fully decoupled from the shared architecture.
 
 ## Repository Structure
 
-The model lives in this repository; the runnable tools live in the [parallax](https://github.com/batteryshark/parallax) repository. The split is deliberate: the vocabulary must not depend on any scanner. (An earlier plan split the ontology and each lens into separate repositories; one model repo turned out to be easier to keep coherent.)
+The model lives in this repository; the runnable tools live in a separate reference implementation. The split is deliberate: the vocabulary must not depend on any scanner. (An earlier plan split the ontology and each lens into separate repositories; one model repo turned out to be easier to keep coherent.)
 
 | Location | Contains |
 |---|---|
@@ -331,7 +331,7 @@ The model lives in this repository; the runnable tools live in the [parallax](ht
 | [`lenses/`](lenses/) | The interpretation layer: MCD, decisions, capability, curiosity, architecture. |
 | [`investigation/`](investigation/) | Investigation cycle mechanics, confidence algebra, method descriptions, method transition guidance. |
 | [`signatures/`](signatures/) | Machine-readable mappings from stable code surfaces to ontology atoms. |
-| [parallax](https://github.com/batteryshark/parallax) | One reference implementation family: the `prlx-engine` observation layer and the `prlx-understand`, `prlx-mcd`, and `prlx-agent-risk` products. |
+| Reference implementation | A separate implementation family: an engine that emits ontology observations, and the products that read those observations through the lenses. |
 
 ## Design Principles
 
@@ -386,7 +386,7 @@ The atom/idiom model should extend naturally to hardware (firmware behaviors, FP
 
 - **Current state:** The framework layer is defined and populated. This document captures the architectural vision.
 - **Done:** the judgment-free ontology and its idioms in [`ontology/`](ontology/), lens-neutral enrichment in [`enrichment/`](enrichment/), five lenses under [`lenses/`](lenses/), the investigation framework in [`investigation/`](investigation/), and signature packs in [`signatures/`](signatures/).
-- **Reference implementation:** the [parallax](https://github.com/batteryshark/parallax) repository implements the model: a deterministic engine that emits ontology observations, and three products that read them through the lenses.
+- **Reference implementation:** a separate reference implementation realizes the model: a deterministic engine that emits ontology observations, and products that read them through the lenses.
 
 ---
 

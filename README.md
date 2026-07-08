@@ -1,14 +1,21 @@
-# Parallax Taxonomy
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/mark-dark.png">
+    <img alt="Parallax logo" src="assets/mark.png" width="84">
+  </picture>
+</p>
 
-A tool-agnostic model for reasoning about what code **can do**: reading code and systems as affordances, decisions, and brittleness rather than lines and defects.
+<h1 align="center">Parallax</h1>
 
-The premise is that no single viewpoint tells you what a system truly is. You need a shared, judgment-free vocabulary for what code does, several interpretive lenses for what those behaviors mean, and an honest account of how sure you are and what would change that.
+<p align="center">A tool-agnostic model for reasoning about what code <strong>can do</strong>:<br>reading a system as affordances, decisions, and brittleness, not lines and defects.</p>
 
-The model keeps fact and judgment in separate layers. An atom records a mechanical fact: `EXEC.SHELL` means "invokes a shell subprocess", never "suspicious". A lens supplies the judgment, reading the same facts through one question: is this malicious, what breaks if it is abused, where does it decide whom to trust. Severity (how bad, if the reading is right) is always reported apart from confidence (how sure we are), and every interpretation names what would disprove it.
+No single viewpoint tells you what a system truly is. You need a judgment-free vocabulary for what code does, a set of interpretive lenses for what those behaviors mean, and an honest account of how sure you are and what would change that.
 
-Three guardrails follow from that separation and hold everywhere in the model. Capability is not accusation: naming what code can do says nothing about intent. Suspicion is not proof: a lens reading carries a confidence and a disproof criterion, not a verdict. Absence of a finding is not a safety guarantee: every method of observation declares what it cannot see.
+The model keeps fact and judgment in separate layers. An atom records a mechanical fact: `EXEC.SHELL` means "invokes a shell subprocess," never "suspicious." A lens supplies the judgment, reading the same facts through one question: is this malicious, what breaks if it is abused, where does it decide whom to trust. Severity (how bad this is, if the reading holds) stays separate from confidence (how sure we are), and every interpretation names what would disprove it.
 
-The model extends to agent surfaces. The tools and skills an agent holds are code, and they change what the agent can be tricked into; that risk is capability combined with steerability, not maliciousness. The same atoms describe what a tool set can reach, and the same lenses read what that reach means once a steerable agent holds it.
+Three guardrails follow from that separation, and they hold everywhere in the model. Capability is not accusation: naming what code can do says nothing about intent. Suspicion is not proof: a lens reading carries a confidence and a disproof criterion, not a verdict. Absence of a finding is not a safety guarantee: every method of observation declares what it cannot see.
+
+The model extends to agent surfaces. The tools and skills an agent holds are code, and they change what the agent can be tricked into doing. That risk is capability combined with steerability, not maliciousness. The same atoms describe what a tool set can reach, and the same lenses read what that reach means once a steerable agent holds it.
 
 ## The layers
 
@@ -26,8 +33,8 @@ The observation is shared; the judgment changes with the lens. A package install
 ## What is here
 
 - [`ontology/`](ontology/): the judgment-free behavior vocabulary: 129 atoms across 18 categories (16 core plus the experimental MEM and TYPE), and the idioms that compose them. An atom records a mechanical fact (`EXEC.SHELL`, `NETW.HTTP`, `CRED.CLOUD`), never a verdict.
-- [`signatures/`](signatures/): machine-readable signature-pack contracts for stable mappings from observed code surfaces to ontology atoms. These are data, not parser mechanics; scanner implementations own extraction. The YAML packs are the source of record; [`scripts/build-signature-json`](scripts/build-signature-json) regenerates their JSON mirrors.
-- [`enrichment/`](enrichment/): lens-neutral external facts that modify confidence (domain age, package provenance, build drift, and the like). Like atoms, these are facts, not judgments; each lens decides whether a datum amplifies, attenuates, or is neutral to its reading.
+- [`signatures/`](signatures/): machine-readable signature-pack contracts for stable mappings from observed code surfaces to ontology atoms. These are data, not parser mechanics; scanner implementations own extraction. The YAML packs are the source of record, and [`scripts/build-signature-json`](scripts/build-signature-json) regenerates their JSON mirrors.
+- [`enrichment/`](enrichment/): lens-neutral external facts that modify confidence, such as domain age, package provenance, and build drift. Like atoms, these are facts, not judgments; each lens decides whether a datum amplifies, attenuates, or is neutral to its reading.
 - [`lenses/`](lenses/): the interpretation layer. Each lens reads the shared atoms through one question: MCD (is this malicious?), decisions (where does it decide trust, dispatch, authority?), capability (blast radius if abused), curiosity (what is surprising for its stated purpose?), and architecture (brittleness and operational risk). Each lens keeps severity separate from confidence and states what would disprove a finding.
 - [`investigation/`](investigation/): the confidence algebra and the methods of observation, including their declared blind spots.
 - [`ARCHITECTURE.md`](ARCHITECTURE.md): the framework and its design philosophy.
@@ -43,7 +50,7 @@ The observation is shared; the judgment changes with the lens. A package install
 
 The model is meant to be read, cited, and implemented. This repository is the source of record for the vocabulary, lenses, confidence model, investigation methods, and response guidance.
 
-Implementations can map observed code surfaces to ontology atoms, enrich those atoms with external context, and then apply one or more lenses to produce an interpretation. The shared vocabulary keeps observations stable while allowing different tools, reviews, or research workflows to ask different questions of the same facts.
+An implementation maps observed code surfaces to ontology atoms, enriches those atoms with external context, then applies one or more lenses to produce an interpretation. The shared vocabulary keeps observations stable while different tools, reviews, or research workflows ask different questions of the same facts.
 
 ## License
 
