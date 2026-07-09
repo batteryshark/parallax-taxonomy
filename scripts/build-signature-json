@@ -6,13 +6,8 @@ scanners read the JSON mirror only, so the JSON is a generated artifact -- edit
 the ``.toml`` and regenerate. This build stays dependency-free: it reads with the
 stdlib ``tomllib`` (Python 3.11+) and writes with the stdlib ``json``.
 
-Two source kinds are compiled, dispatched on ``schema_version``:
-
-- ``parallax-signature-pack/v1`` -- signature packs (callee/content/binary-import
-  surface -> atom mappings), with dead-value linting.
-- ``parallax-atom-registry/v1`` -- the atom registry (skill-emitted OBF/EVADE/
-  STEGO tactic atoms), emitted with a deterministically sorted ``atoms`` array so
-  rebuilds are byte-stable.
+The signature packs (``parallax-signature-pack/v1`` -- callee/content/binary-import
+surface -> atom mappings) are compiled here, with dead-value linting.
 
 Usage:
   scripts/build-signature-json                       # rebuild every source
@@ -28,12 +23,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SIGNATURE_PACK_SCHEMA = "parallax-signature-pack/v1"
-ATOM_REGISTRY_SCHEMA = "parallax-atom-registry/v1"
 DEFAULT_SOURCES = [
     "signatures/packs/source-callees.toml",
     "signatures/packs/content-surfaces.toml",
     "signatures/packs/binary-imports.toml",
-    "ontology/atom-registry.toml",
 ]
 
 
@@ -98,35 +91,6 @@ def _build_signature_pack(data: dict, toml_path: Path) -> int:
     return _write_json(toml_path.with_suffix(".json"), data)
 
 
-def _build_atom_registry(data: dict, toml_path: Path) -> int:
-    atoms = data.get("atoms")
-    if not isinstance(atoms, list):
-        print(f"atom registry {toml_path}: 'atoms' must be an array", file=sys.stderr)
-        return 1
-
-    bad = []
-    for i, row in enumerate(atoms):
-        if not isinstance(row, dict):
-            bad.append((i, "not a table"))
-            continue
-        atom = row.get("atom")
-        family = row.get("family")
-        if not isinstance(atom, str) or "." not in atom:
-            bad.append((i, f"atom {atom!r} must be a 'FAMILY.NAME' string"))
-        elif not isinstance(family, str) or atom.split(".", 1)[0] != family:
-            bad.append((i, f"family {family!r} must be the prefix of atom {atom!r}"))
-    if bad:
-        print(f"invalid atom registry {toml_path}:", file=sys.stderr)
-        for i, why in bad:
-            print(f"  atoms[{i}]: {why}", file=sys.stderr)
-        return 1
-
-    # Sort by atom id so the JSON mirror is byte-stable regardless of TOML order.
-    data = dict(data)
-    data["atoms"] = sorted(atoms, key=lambda r: r["atom"])
-    return _write_json(toml_path.with_suffix(".json"), data)
-
-
 def build(toml_path: Path) -> int:
     if not toml_path.is_file():
         print(f"source not found: {toml_path}", file=sys.stderr)
@@ -141,8 +105,6 @@ def build(toml_path: Path) -> int:
     schema = data.get("schema_version")
     if schema == SIGNATURE_PACK_SCHEMA:
         return _build_signature_pack(data, toml_path)
-    if schema == ATOM_REGISTRY_SCHEMA:
-        return _build_atom_registry(data, toml_path)
     print(f"unknown schema_version {schema!r} in {toml_path}", file=sys.stderr)
     return 1
 
